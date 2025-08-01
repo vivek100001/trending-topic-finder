@@ -15,26 +15,47 @@ def get_trending_queries(keyword, geo):
         return top_queries['query'].tolist()[:5]  # Top 5 related queries
     return []
 
-def fetch_articles_from_newsapi(query):
+def fetch_articles_from_newsapi(query, base_keyword):
+    from datetime import datetime, timedelta
     from_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
     to_date = datetime.now().strftime('%Y-%m-%d')
 
+    # ✅ Limit to Indian news domains only
+    indian_domains = [
+        "ndtv.com",
+        "moneycontrol.com",
+        "livemint.com",
+        "timesofindia.indiatimes.com",
+        "indiatoday.in",
+        "business-standard.com",
+        "hindustantimes.com",
+        "thehindu.com",
+        "financialexpress.com",
+        "news18.com"
+    ]
+
     url = 'https://newsapi.org/v2/everything'
     params = {
-        'q': query,
+        'q': f'"{base_keyword}" AND "{query}"',
         'from': from_date,
         'to': to_date,
         'sortBy': 'publishedAt',
         'language': 'en',
         'apiKey': NEWS_API_KEY,
-        'pageSize': 10
+        'domains': ','.join(indian_domains),
+        'pageSize': 20
     }
 
     response = requests.get(url, params=params)
     if response.status_code == 200:
-        return response.json().get('articles', [])
+        articles = response.json().get('articles', [])
+        return [
+            a for a in articles
+            if base_keyword.lower() in a['title'].lower() or query.lower() in a['title'].lower()
+        ]
     else:
         return []
+
 
 # 🌍 Country selection (Google Trends geo codes)
 geo_map = {
@@ -63,10 +84,10 @@ if st.button("Get Trends & News") and keyword:
         st.warning("No trending queries found for this keyword.")
     else:
         st.success(f"Top related trending queries in {country_name}:")
-        for i, q in enumerate(queries, 1):
-            st.markdown(f"**{i}. {q}**")
-            with st.spinner(f"Fetching news for: {q}"):
-                articles = fetch_articles_from_newsapi(q)
+      for i, q in enumerate(queries, 1):
+    st.markdown(f"**{i}. {q}**")
+    with st.spinner(f"Fetching news for: {q}"):
+        articles = fetch_articles_from_newsapi(q, keyword)
                 if articles:
                     for article in articles:
                         st.markdown(f"- [{article['title']}]({article['url']})")

@@ -40,6 +40,7 @@ def filter_articles(articles, keyword):
 # 🔷 Streamlit UI
 st.set_page_config(page_title="Trending Topic Finder", layout="centered")
 st.title("📈 Trending Topic Finder (Last 30 Days)")
+st.text ("Developed by Vivek")
 
 keyword = st.text_input("🔍 Enter a keyword")
 websites_input = st.text_input("🌐 Filter by website domains (optional, comma-separated)")

@@ -16,7 +16,6 @@ def get_trending_queries(keyword, geo):
     return []
 
 def fetch_articles_from_newsapi(query, base_keyword):
-    from datetime import datetime, timedelta
     from_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
     to_date = datetime.now().strftime('%Y-%m-%d')
 
@@ -56,7 +55,6 @@ def fetch_articles_from_newsapi(query, base_keyword):
     else:
         return []
 
-
 # 🌍 Country selection (Google Trends geo codes)
 geo_map = {
     "Worldwide": "",
@@ -84,10 +82,11 @@ if st.button("Get Trends & News") and keyword:
         st.warning("No trending queries found for this keyword.")
     else:
         st.success(f"Top related trending queries in {country_name}:")
-      for i, q in enumerate(queries, 1):
-    st.markdown(f"**{i}. {q}**")
-    with st.spinner(f"Fetching news for: {q}"):
-        articles = fetch_articles_from_newsapi(q, keyword)
+
+        for i, q in enumerate(queries, 1):
+            st.markdown(f"**{i}. {q}**")
+            with st.spinner(f"Fetching news for: {q}"):
+                articles = fetch_articles_from_newsapi(q, keyword)
                 if articles:
                     for article in articles:
                         st.markdown(f"- [{article['title']}]({article['url']})")
